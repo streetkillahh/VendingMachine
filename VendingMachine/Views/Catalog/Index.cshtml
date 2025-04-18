@@ -1,0 +1,81 @@
+﻿@model IEnumerable<VendingMachine.Models.Domain.Catalog>
+@{
+    ViewData["Title"] = "Газированные напитки";
+}
+
+<h1>Газированные напитки</h1>
+
+<!-- Фильтры -->
+<div class="filters">
+    <div class="filter-item">
+        <label for="brandFilter">Бренд:</label>
+        <select id="brandFilter">
+            <option value="all">Все бренды</option>
+            @foreach (var brand in ViewBag.Brands)
+            {
+                    <option value="@brand.Id">@brand.Name</option>
+            }
+        </select>
+    </div>
+    <div class="filter-item">
+        <label for="priceFilter">Стоимость:</label>
+        <input type="range" id="priceFilter" min="0" max="100" />
+        <span id="priceRangeValue">0 руб.</span>
+    </div>
+</div>
+
+<!-- Каталог товаров -->
+<div class="catalog-grid">
+    @foreach (var item in Model)
+    {
+            <div class="catalog-item">
+                <h3>@item.Name</h3>
+                <p>Цена: @item.Price руб.</p>
+            @if (item.Quantity > 0)
+            {
+                        <button class="select-button" data-id="@item.Id">Выбрать</button>
+            }
+            else
+            {
+                        <button class="select-button disabled" disabled>Закончился</button>
+            }
+            </div>
+    }
+</div>
+
+<!-- Кнопка "Выбрано" -->
+<button id="checkoutButton" class="checkout-button" disabled>Выбрано: 0</button>
+
+@section Scripts {
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const cart = [];
+                const checkoutButton = document.getElementById("checkoutButton");
+
+                // Обновление количества выбранных товаров
+                function updateCart() {
+                    checkoutButton.textContent = `Выбрано: ${cart.length}`;
+                    checkoutButton.disabled = cart.length === 0;
+                }
+
+                // Обработчик выбора товара
+                document.querySelectorAll(".select-button").forEach(button => {
+                    button.addEventListener("click", function () {
+                        const itemId = this.dataset.id;
+                        const item = cart.find(i => i.id === itemId);
+                        if (!item) {
+                            cart.push({ id: itemId });
+                            updateCart();
+                        }
+                    });
+                });
+
+                // Обновление ползунка стоимости
+                const priceFilter = document.getElementById("priceFilter");
+                const priceRangeValue = document.getElementById("priceRangeValue");
+                priceFilter.addEventListener("input", function () {
+                    priceRangeValue.textContent = `${this.value} руб.`;
+                });
+            });
+        </script>
+}
