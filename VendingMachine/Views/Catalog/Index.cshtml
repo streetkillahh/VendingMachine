@@ -3,79 +3,96 @@
     ViewData["Title"] = "Газированные напитки";
 }
 
-<h1>Газированные напитки</h1>
+<h1 style="font-size: 24px; margin-bottom: 20px;">Газированные напитки</h1>
 
-<!-- Фильтры -->
-<div class="filters">
-    <div class="filter-item">
-        <label for="brandFilter">Бренд:</label>
-        <select id="brandFilter">
-            <option value="all">Все бренды</option>
-            @foreach (var brand in ViewBag.Brands)
-            {
+<!-- Панель фильтров -->
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap;">
+    <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
+        <div>
+            <label for="brandFilter">Выберите бренд</label><br />
+            <select id="brandFilter" style="padding: 5px; width: 150px;">
+                <option value="all">Все бренды</option>
+                @foreach (var brand in ViewBag.Brands)
+                {
                     <option value="@brand.Id">@brand.Name</option>
-            }
-        </select>
+                }
+            </select>
+        </div>
+
+        <div>
+            <label for="priceFilter">Стоимость</label><br />
+            <input type="range" id="priceFilter" min="0" max="110" value="110" />
+            <span id="priceRangeValue">110 руб.</span>
+        </div>
     </div>
-    <div class="filter-item">
-        <label for="priceFilter">Стоимость:</label>
-        <input type="range" id="priceFilter" min="0" max="100" />
-        <span id="priceRangeValue">0 руб.</span>
+
+    <div style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
+        <button style="padding: 10px 20px; background: #e0e0e0; border: none; cursor: pointer;">Импорт</button>
+        <button id="checkoutButton" class="checkout-button" style="padding: 10px 20px; background: #4CAF50; color: white; border: none;" disabled>Выбрано: 0</button>
     </div>
 </div>
 
-<!-- Каталог товаров -->
-<div class="catalog-grid">
+<!-- Сетка товаров -->
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; max-width: 100%;">
     @foreach (var item in Model)
     {
-            <div class="catalog-item">
-                <h3>@item.Name</h3>
-                <p>Цена: @item.Price руб.</p>
+        // Определим путь к картинке на основе названия
+        var imageName = item.Name.ToLower().Contains("cola") ? "cocacola.png" :
+        item.Name.ToLower().Contains("fanta") ? "fanta.png" :
+        item.Name.ToLower().Contains("sprite") ? "sprite.png" :
+        item.Name.ToLower().Contains("pepper") ? "drpepper.png" : "placeholder.png";
+
+        <div style="border: 1px solid #ccc; border-radius: 10px; padding: 10px; text-align: center;">
+            <img src="~/images/@imageName" alt="@item.Name" style="height: 200px; object-fit: contain;" />
+            <h4 style="margin: 10px 0;">@item.Name</h4>
+            <p style="font-weight: bold;">@item.Price руб.</p>
             @if (item.Quantity > 0)
             {
-                        <button class="select-button" data-id="@item.Id">Выбрать</button>
+                <button class="select-button" data-id="@item.Id"
+                        style="padding: 8px 12px; background: #FFD700; border: none; cursor: pointer;">
+                    Выбрать
+                </button>
             }
             else
             {
-                        <button class="select-button disabled" disabled>Закончился</button>
+                <button disabled
+                        style="padding: 8px 12px; background: #ccc; border: none; cursor: not-allowed;">
+                    Закончился
+                </button>
             }
-            </div>
+        </div>
     }
 </div>
 
-<!-- Кнопка "Выбрано" -->
-<button id="checkoutButton" class="checkout-button" disabled>Выбрано: 0</button>
-
 @section Scripts {
-        <script>
-            document.addEventListener("DOMContentLoaded", function () {
-                const cart = [];
-                const checkoutButton = document.getElementById("checkoutButton");
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const cart = [];
+            const checkoutButton = document.getElementById("checkoutButton");
 
-                // Обновление количества выбранных товаров
-                function updateCart() {
-                    checkoutButton.textContent = `Выбрано: ${cart.length}`;
-                    checkoutButton.disabled = cart.length === 0;
-                }
+            function updateCart() {
+                checkoutButton.textContent = `Выбрано: ${cart.length}`;
+                checkoutButton.disabled = cart.length === 0;
+            }
 
-                // Обработчик выбора товара
-                document.querySelectorAll(".select-button").forEach(button => {
-                    button.addEventListener("click", function () {
-                        const itemId = this.dataset.id;
-                        const item = cart.find(i => i.id === itemId);
-                        if (!item) {
-                            cart.push({ id: itemId });
-                            updateCart();
-                        }
-                    });
-                });
-
-                // Обновление ползунка стоимости
-                const priceFilter = document.getElementById("priceFilter");
-                const priceRangeValue = document.getElementById("priceRangeValue");
-                priceFilter.addEventListener("input", function () {
-                    priceRangeValue.textContent = `${this.value} руб.`;
+            document.querySelectorAll(".select-button").forEach(button => {
+                button.addEventListener("click", function () {
+                    const itemId = this.dataset.id;
+                    const item = cart.find(i => i.id === itemId);
+                    if (!item) {
+                        cart.push({ id: itemId });
+                        this.textContent = "Выбрано";
+                        this.style.background = "#4CAF50";
+                        updateCart();
+                    }
                 });
             });
-        </script>
+
+            const priceFilter = document.getElementById("priceFilter");
+            const priceRangeValue = document.getElementById("priceRangeValue");
+            priceFilter.addEventListener("input", function () {
+                priceRangeValue.textContent = `${this.value} руб.`;
+            });
+        });
+    </script>
 }

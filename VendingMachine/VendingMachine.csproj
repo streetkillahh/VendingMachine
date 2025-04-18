@@ -7,6 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="wwwroot\images\cocacola.png" />
+    <Content Remove="wwwroot\images\drpepper.png" />
+    <Content Remove="wwwroot\images\fanta.png" />
+    <Content Remove="wwwroot\images\sprite.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.4">
@@ -17,6 +24,13 @@
 
   <ItemGroup>
     <Folder Include="Views\Payment\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="wwwroot\images\cocacola.png" />
+    <Resource Include="wwwroot\images\drpepper.png" />
+    <Resource Include="wwwroot\images\fanta.png" />
+    <Resource Include="wwwroot\images\sprite.png" />
   </ItemGroup>
 
 </Project>
