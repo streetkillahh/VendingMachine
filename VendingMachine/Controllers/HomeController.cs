@@ -18,6 +18,12 @@ namespace VendingMachine.Controllers
             return View();
         }
 
+        public IActionResult Checkout()
+        {
+            return View();
+        }
+
+
         public IActionResult Privacy()
         {
             return View();

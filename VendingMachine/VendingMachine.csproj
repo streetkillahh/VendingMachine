@@ -27,7 +27,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Views\Catalog\NewFolder\" />
     <Folder Include="Views\Payment\" />
   </ItemGroup>
 
