@@ -7,9 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Remove="wwwroot\images\cocacola.png" />
+    <Content Remove="wwwroot\images\chernogolovka.png" />
+    <Content Remove="wwwroot\images\cola.png" />
     <Content Remove="wwwroot\images\drpepper.png" />
     <Content Remove="wwwroot\images\fanta.png" />
+    <Content Remove="wwwroot\images\irnbru.png" />
+    <Content Remove="wwwroot\images\mountaindew.png" />
+    <Content Remove="wwwroot\images\pepsi.png" />
     <Content Remove="wwwroot\images\sprite.png" />
   </ItemGroup>
 
@@ -27,9 +31,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="wwwroot\images\cocacola.png" />
+    <Resource Include="wwwroot\images\chernogolovka.png" />
+    <Resource Include="wwwroot\images\cola.png" />
     <Resource Include="wwwroot\images\drpepper.png" />
     <Resource Include="wwwroot\images\fanta.png" />
+    <Resource Include="wwwroot\images\irnbru.png" />
+    <Resource Include="wwwroot\images\mountaindew.png" />
+    <Resource Include="wwwroot\images\pepsi.png" />
     <Resource Include="wwwroot\images\sprite.png" />
   </ItemGroup>
 

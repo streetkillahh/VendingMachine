@@ -36,11 +36,17 @@
 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; max-width: 100%;">
     @foreach (var item in Model)
     {
-        // Определим путь к картинке на основе названия
-        var imageName = item.Name.ToLower().Contains("cola") ? "cocacola.png" :
+        // Определение пути к картинке на основе названия
+        var imageName = item.Name.ToLower().Contains("cola") ? "cola.png" :
+        item.Name.ToLower().Contains("chernogolovka") ? "chernogolovka.png" :
+        item.Name.ToLower().Contains("pepper") ? "drpepper.png" :
         item.Name.ToLower().Contains("fanta") ? "fanta.png" :
+        item.Name.ToLower().Contains("irn bru") || item.Name.ToLower().Contains("irnbru") ? "irnbru.png" :
+        item.Name.ToLower().Contains("mountain dew") || item.Name.ToLower().Contains("mountaindew") ? "mountaindew.png" :
+        item.Name.ToLower().Contains("pepsi") ? "pepsi.png" :
         item.Name.ToLower().Contains("sprite") ? "sprite.png" :
-        item.Name.ToLower().Contains("pepper") ? "drpepper.png" : "placeholder.png";
+        "placeholder.png";
+
 
         <div style="border: 1px solid #ccc; border-radius: 10px; padding: 10px; text-align: center;">
             <img src="~/images/@imageName" alt="@item.Name" style="height: 200px; object-fit: contain;" />
