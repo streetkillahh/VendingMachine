@@ -1,104 +1,185 @@
 ﻿@model IEnumerable<VendingMachine.Models.Domain.Catalog>
+
 @{
     ViewData["Title"] = "Газированные напитки";
 }
 
-<h1 style="font-size: 24px; margin-bottom: 20px;">Газированные напитки</h1>
+<div class="container my-4">
+    <h2>Газированные напитки</h2>
 
-<!-- Панель фильтров -->
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap;">
-    <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
-        <div>
-            <label for="brandFilter">Выберите бренд</label><br />
-            <select id="brandFilter" style="padding: 5px; width: 150px;">
-                <option value="all">Все бренды</option>
-                @foreach (var brand in ViewBag.Brands)
-                {
-                    <option value="@brand.Id">@brand.Name</option>
-                }
-            </select>
+    <div class="d-flex justify-content-between align-items-center my-3">
+        <div class="d-flex gap-3 align-items-center">
+            <div>
+                <label for="brandSelect">Выберите бренд</label>
+                <select id="brandSelect" class="form-select">
+                    <option value="">Все</option>
+                    @foreach (var brand in Model.Select(m => m.Brand.Name).Distinct())
+                    {
+                        <option value="@brand">@brand</option>
+                    }
+                </select>
+            </div>
+            <div>
+                <label for="priceRange" class="form-label">Стоимость</label>
+                <input type="range" class="form-range" min="0" max="110" id="priceRange">
+                <span>0 руб. - 110 руб.</span>
+            </div>
         </div>
-
-        <div>
-            <label for="priceFilter">Стоимость</label><br />
-            <input type="range" id="priceFilter" min="0" max="110" value="110" />
-            <span id="priceRangeValue">110 руб.</span>
+        <div class="d-flex gap-2">
+            <button class="btn btn-secondary">Импорт</button>
+            <a id="selectedCountBtn" class="btn btn-success disabled" href="#">Выбрано: 0</a>
         </div>
     </div>
 
-    <div style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
-        <button style="padding: 10px 20px; background: #e0e0e0; border: none; cursor: pointer;">Импорт</button>
-        <button id="checkoutButton" class="checkout-button" style="padding: 10px 20px; background: #4CAF50; color: white; border: none;" disabled>Выбрано: 0</button>
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+        @foreach (var item in Model.Select((drink, index) => new { drink, index }))
+        {
+            var drinkId = $"drink-{item.index}";
+            var imageName =
+            item.drink.Name.ToLower().Contains("cola") ? "cola.png" :
+            item.drink.Name.ToLower().Contains("fanta") ? "fanta.png" :
+            item.drink.Name.ToLower().Contains("sprite") ? "sprite.png" :
+            item.drink.Name.ToLower().Contains("pepper") ? "drpepper.png" :
+            item.drink.Name.ToLower().Contains("chernogolovka") ? "chernogolovka.png" :
+            item.drink.Name.ToLower().Contains("irn") ? "irnbru.png" :
+            item.drink.Name.ToLower().Contains("mountain") ? "mountaindew.png" :
+            item.drink.Name.ToLower().Contains("pepsi") ? "pepsi.png" : "placeholder.png";
+
+            <div class="col drink-item"
+                 data-brand="@item.drink.Brand.Name"
+                 data-price="@item.drink.Price">
+                <div class="card h-100 text-center">
+                    <img src="@Url.Content("~/images/" + imageName)" class="card-img-top p-3" alt="@item.drink.Name">
+                    <div class="card-body">
+                        <p class="card-text">@item.drink.Name</p>
+                        <p class="fw-bold">@item.drink.Price руб.</p>
+                        @if (item.drink.Quantity > 0)
+                        {
+                            <button class="btn btn-warning select-btn"
+                                    data-id="@drinkId"
+                                    data-selected="false">
+                                Выбрать
+                            </button>
+                        }
+                        else
+                        {
+                            <button class="btn btn-secondary" disabled>Закончился</button>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
     </div>
-</div>
-
-<!-- Сетка товаров -->
-<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; max-width: 100%;">
-    @foreach (var item in Model)
-    {
-        // Определение пути к картинке на основе названия
-        var imageName = item.Name.ToLower().Contains("cola") ? "cola.png" :
-        item.Name.ToLower().Contains("chernogolovka") ? "chernogolovka.png" :
-        item.Name.ToLower().Contains("pepper") ? "drpepper.png" :
-        item.Name.ToLower().Contains("fanta") ? "fanta.png" :
-        item.Name.ToLower().Contains("irn bru") || item.Name.ToLower().Contains("irnbru") ? "irnbru.png" :
-        item.Name.ToLower().Contains("mountain dew") || item.Name.ToLower().Contains("mountaindew") ? "mountaindew.png" :
-        item.Name.ToLower().Contains("pepsi") ? "pepsi.png" :
-        item.Name.ToLower().Contains("sprite") ? "sprite.png" :
-        "placeholder.png";
-
-
-        <div style="border: 1px solid #ccc; border-radius: 10px; padding: 10px; text-align: center;">
-            <img src="~/images/@imageName" alt="@item.Name" style="height: 200px; object-fit: contain;" />
-            <h4 style="margin: 10px 0;">@item.Name</h4>
-            <p style="font-weight: bold;">@item.Price руб.</p>
-            @if (item.Quantity > 0)
-            {
-                <button class="select-button" data-id="@item.Id"
-                        style="padding: 8px 12px; background: #FFD700; border: none; cursor: pointer;">
-                    Выбрать
-                </button>
-            }
-            else
-            {
-                <button disabled
-                        style="padding: 8px 12px; background: #ccc; border: none; cursor: not-allowed;">
-                    Закончился
-                </button>
-            }
-        </div>
-    }
 </div>
 
 @section Scripts {
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const cart = [];
-            const checkoutButton = document.getElementById("checkoutButton");
+        const selectedItems = new Set();
+        const drinkItems = document.querySelectorAll('.drink-item');
+        const brandSelect = document.getElementById('brandSelect');
+        const priceRange = document.getElementById('priceRange');
+        const priceLabel = priceRange.nextElementSibling;
+        const counterBtn = document.getElementById('selectedCountBtn');
 
-            function updateCart() {
-                checkoutButton.textContent = `Выбрано: ${cart.length}`;
-                checkoutButton.disabled = cart.length === 0;
-            }
+        function updateVisibleDrinks() {
+            const selectedBrand = brandSelect.value;
+            const maxPrice = parseFloat(priceRange.value);
 
-            document.querySelectorAll(".select-button").forEach(button => {
-                button.addEventListener("click", function () {
-                    const itemId = this.dataset.id;
-                    const item = cart.find(i => i.id === itemId);
-                    if (!item) {
-                        cart.push({ id: itemId });
-                        this.textContent = "Выбрано";
-                        this.style.background = "#4CAF50";
-                        updateCart();
-                    }
-                });
+            drinkItems.forEach(item => {
+                const brand = item.getAttribute('data-brand');
+                const price = parseFloat(item.getAttribute('data-price'));
+
+                const matchBrand = selectedBrand === "" || brand === selectedBrand;
+                const matchPrice = price <= maxPrice;
+
+                item.style.display = (matchBrand && matchPrice) ? "block" : "none";
             });
 
-            const priceFilter = document.getElementById("priceFilter");
-            const priceRangeValue = document.getElementById("priceRangeValue");
-            priceFilter.addEventListener("input", function () {
-                priceRangeValue.textContent = `${this.value} руб.`;
+            priceLabel.textContent = `0 руб. - ${maxPrice} руб.`;
+        }
+
+        function getSelectedDrinksData() {
+            const selected = [];
+            document.querySelectorAll('.select-btn[data-selected="true"]').forEach(btn => {
+                const card = btn.closest('.card');
+                const name = card.querySelector('.card-text').textContent;
+                const priceText = card.querySelector('.fw-bold').textContent;
+                const price = parseFloat(priceText.replace(/[^\d.]/g, ''));
+                const imageUrl = card.querySelector('img').getAttribute('src');
+
+                selected.push({ name, price, imageUrl, isAvailable: true, isSelected: true });
+            });
+            return selected;
+        }
+
+        document.getElementById('selectedCountBtn').addEventListener('click', function (e) {
+            e.preventDefault();
+            const selectedDrinks = getSelectedDrinksData();
+
+            if (selectedDrinks.length > 0) {
+                localStorage.setItem('selectedDrinks', JSON.stringify(selectedDrinks));
+                window.location.href = '/Order/FromStorage';
+            }
+        });
+
+        function updatePriceRangeLimits() {
+            const selectedBrand = brandSelect.value;
+            let prices = [];
+
+            drinkItems.forEach(item => {
+                const brand = item.getAttribute('data-brand');
+                const price = parseFloat(item.getAttribute('data-price'));
+
+                if (selectedBrand === "" || brand === selectedBrand) {
+                    prices.push(price);
+                }
+            });
+
+            if (prices.length > 0) {
+                const min = Math.min(...prices);
+                const max = Math.max(...prices);
+                priceRange.min = min;
+                priceRange.max = max;
+                priceRange.value = max;
+                priceLabel.textContent = `0 руб. - ${max} руб.`;
+            }
+        }
+
+        brandSelect.addEventListener('change', () => {
+            updatePriceRangeLimits();
+            updateVisibleDrinks();
+        });
+
+        priceRange.addEventListener('input', updateVisibleDrinks);
+
+        // выбор товара
+        document.querySelectorAll('.select-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const id = btn.getAttribute('data-id');
+                const selected = btn.getAttribute('data-selected') === 'true';
+
+                if (selected) {
+                    selectedItems.delete(id);
+                    btn.classList.remove('btn-success');
+                    btn.classList.add('btn-warning');
+                    btn.textContent = 'Выбрать';
+                    btn.setAttribute('data-selected', 'false');
+                } else {
+                    selectedItems.add(id);
+                    btn.classList.remove('btn-warning');
+                    btn.classList.add('btn-success');
+                    btn.textContent = 'Выбрано';
+                    btn.setAttribute('data-selected', 'true');
+                }
+
+                const count = selectedItems.size;
+                counterBtn.textContent = `Выбрано: ${count}`;
+                counterBtn.classList.toggle('disabled', count === 0);
             });
         });
+
+        // начальная инициализация
+        updatePriceRangeLimits();
+        updateVisibleDrinks();
     </script>
 }

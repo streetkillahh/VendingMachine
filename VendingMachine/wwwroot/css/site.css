@@ -73,16 +73,23 @@ h1 {
         background-color: #ccc;
         cursor: not-allowed;
     }
+.select-button.selected {
+    background-color: #28a745;
+    color: white;
+}
 
 .checkout-button {
-    display: block;
-    margin: 20px auto;
+    position: fixed;
+    top: 20px;
+    right: 20px;
     padding: 10px 20px;
     background-color: #28a745;
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    z-index: 1000;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
     .checkout-button:disabled {
