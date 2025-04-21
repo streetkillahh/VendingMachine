@@ -23,12 +23,7 @@ public class ApplicationDbContext : DbContext
 
         // Настройка точности и масштаба для свойства TotalAmount в таблице Order
         modelBuilder.Entity<Order>()
-            .Property(o => o.TotalAmount)
-            .HasColumnType("decimal(18,2)");
-
-        // Настройка точности и масштаба для свойства Price в таблице OrderItem
-        modelBuilder.Entity<OrderItem>()
-            .Property(oi => oi.Price)
+            .Property(o => o.TotalPrice)
             .HasColumnType("decimal(18,2)");
     }
 }
