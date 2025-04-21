@@ -43,7 +43,7 @@ public static class SeedData
                 new Catalog { Name = "Pepsi Max", Price = 50, Quantity = 5, BrandId = brandPepsi.Id },
                 new Catalog { Name = "Mountain Dew", Price = 48, Quantity = 7, BrandId = brandMountainDew.Id },
                 new Catalog { Name = "Irn Bru", Price = 40, Quantity = 12, BrandId = brandIrnBru.Id },
-                new Catalog { Name = "Черноголовка", Price = 35, Quantity = 6, BrandId = brandChernogolovka.Id }
+                new Catalog { Name = "Chenogolovka", Price = 35, Quantity = 6, BrandId = brandChernogolovka.Id }
             );
             context.SaveChanges();
         }
