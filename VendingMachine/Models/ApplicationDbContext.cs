@@ -25,5 +25,11 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<Order>()
             .Property(o => o.TotalPrice)
             .HasColumnType("decimal(18,2)");
+
+
+        // Настройка точности для свойства UnitPrice в таблице OrderItem
+        modelBuilder.Entity<OrderItem>()
+            .Property(oi => oi.UnitPrice)
+            .HasColumnType("decimal(18,2");
     }
 }

@@ -31,10 +31,12 @@ namespace VendingMachine.Controllers
         {
             return View();
         }
-        // Controllers/OrderController.cs
+        
         [HttpPost]
         public IActionResult SaveOrder([FromBody] OrderDto orderDto)
         {
+            Console.WriteLine($"Получен заказ: {System.Text.Json.JsonSerializer.Serialize(orderDto)}");
+
             if (orderDto.TotalInserted < orderDto.TotalPrice)
             {
                 return BadRequest("Недостаточно средств.");
@@ -49,19 +51,33 @@ namespace VendingMachine.Controllers
 
             foreach (var item in orderDto.Items)
             {
+                var product = _context.Catalogs.FirstOrDefault(p => p.Id == item.Id);
+                if (product == null)
+                {
+                    return BadRequest(new { error = $"Товар с ID {item.Id} не найден." });
+
+                }
+
+                if (product.Quantity < 1)
+                {
+                    return BadRequest(new { error = $"Товар с ID {item.Id} не найден." });
+
+                }
+
+                if (product == null)
+                {
+                    return BadRequest(new { error = $"Товар с ID {item.Id} не найден." });
+
+                }
+
                 order.Items.Add(new OrderItem
                 {
-                    CatalogId = item.Id,
+                    CatalogId = product.Id,
                     Quantity = 1,
-                    UnitPrice = item.Price
+                    UnitPrice = product.Price
                 });
 
-                // уменьшение количества на складе
-                var product = _context.Catalogs.FirstOrDefault(p => p.Id == item.Id);
-                if (product != null)
-                {
-                    product.Quantity -= 1;
-                }
+                product.Quantity -= 1;
             }
 
             _context.Orders.Add(order);
@@ -70,6 +86,7 @@ namespace VendingMachine.Controllers
             decimal change = orderDto.TotalInserted - orderDto.TotalPrice;
             return Ok(new { success = true, change });
         }
+
 
     }
 }

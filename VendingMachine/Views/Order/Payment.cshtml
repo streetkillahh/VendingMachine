@@ -1,67 +1,76 @@
 ﻿@{
-    ViewData["Title"] = "Оплата";
+    ViewData["Title"] = "Оплата заказа";
+    var total = ViewBag.Total as decimal? ?? 0;
 }
 
 <div class="container my-5">
-    <h2 class="text-center mb-4">Оплата заказа</h2>
+    <h2 class="mb-4 text-center">Оплата заказа</h2>
 
     <div class="text-center mb-4">
-        <h4>Сумма к оплате: <span id="paymentTotal">0.00</span> руб.</h4>
+        <h4>Сумма к оплате: <span id="totalAmount">@total.ToString("0.00")</span> руб.</h4>
+        <h5>Внесено: <span id="insertedAmount">0.00</span> руб.</h5>
     </div>
 
-    <div class="text-center mb-3">
-        <label for="coinInput" class="form-label">Вставьте монеты (введите сумму):</label>
-        <input type="number" class="form-control d-inline-block w-auto" id="coinInput" step="0.01" min="0">
+    <div class="d-flex justify-content-center gap-3 flex-wrap mb-4">
+        <button class="btn btn-outline-primary" onclick="insertCoin(1)">1 руб.</button>
+        <button class="btn btn-outline-primary" onclick="insertCoin(2)">2 руб.</button>
+        <button class="btn btn-outline-primary" onclick="insertCoin(5)">5 руб.</button>
+        <button class="btn btn-outline-primary" onclick="insertCoin(10)">10 руб.</button>
     </div>
 
-    <div class="text-center">
-        <button id="payBtn" class="btn btn-success">Оплатить</button>
+    <div class="d-flex justify-content-center gap-3">
+        <a href="/Order/Checkout" class="btn btn-outline-secondary">Вернуться в корзину</a>
+        <button id="confirmBtn" class="btn btn-success" disabled onclick="confirmPayment()">Подтвердить оплату</button>
     </div>
 </div>
 
 @section Scripts {
-        <script>
-            const selectedDrinks = JSON.parse(localStorage.getItem("selectedDrinks")) || [];
+    <script>
+        const total = parseFloat("@total");
+        let inserted = 0;
+        const selectedDrinks = JSON.parse(localStorage.getItem("selectedDrinks")) || [];
 
-            function calculateTotal(drinks) {
-                return drinks.reduce((sum, item) => sum + parseFloat(item.price), 0).toFixed(2);
+        function updateUI() {
+            document.getElementById("insertedAmount").textContent = inserted.toFixed(2);
+            document.getElementById("confirmBtn").disabled = inserted < total;
+        }
+
+        function insertCoin(amount) {
+            inserted += amount;
+            updateUI();
+        }
+
+        function confirmPayment() {
+            fetch("/Order/SaveOrder", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    items: selectedDrinks.map(d => ({ id: d.id, price: parseFloat(d.price) })),
+                    totalPrice: total,
+                    totalInserted: inserted
+                })
+            })
+                            .then(async res => {
+            const data = await res.json();
+            if (!res.ok) {
+                throw new Error(data.error || "Неизвестная ошибка");
             }
+            return data;
+        })
+        .then(data => {
+            alert(`Заказ оплачен! Сдача: ${data.change.toFixed(2)} руб.`);
+            localStorage.removeItem("selectedDrinks");
+            window.location.href = "/Order/Success";
+        })
+        .catch(err => {
+            alert("Ошибка: " + err.message);
+            console.error(err);
+        });
 
-            document.getElementById("paymentTotal").textContent = calculateTotal(selectedDrinks);
 
-            document.getElementById("payBtn").addEventListener("click", function () {
-                const coinInput = document.getElementById("coinInput");
-                const inserted = parseFloat(coinInput.value);
-                const total = parseFloat(document.getElementById("paymentTotal").textContent);
+        }
 
-                if (isNaN(inserted) || inserted < total) {
-                    alert("Внесённой суммы недостаточно!");
-                    return;
-                }
-
-                fetch("/Order/SaveOrder", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        items: selectedDrinks.map(d => ({ id: d.id, price: parseFloat(d.price) })),
-                        totalPrice: total,
-                        totalInserted: inserted
-                    })
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        localStorage.removeItem("selectedDrinks");
-                        alert(`Заказ оплачен! Сдача: ${data.change.toFixed(2)} руб.`);
-                        window.location.href = "/Order/Success";
-                    } else {
-                        alert("Ошибка при сохранении заказа.");
-                    }
-                })
-                .catch(err => {
-                    alert("Ошибка соединения с сервером.");
-                    console.error(err);
-                });
-            });
-        </script>
+        updateUI();
+    </script>
 }
+

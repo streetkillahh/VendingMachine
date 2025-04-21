@@ -122,7 +122,7 @@ namespace VendingMachine.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("UnitPrice")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,2");
 
                     b.HasKey("Id");
 
