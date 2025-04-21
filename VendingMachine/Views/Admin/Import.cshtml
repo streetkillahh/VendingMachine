@@ -1,0 +1,20 @@
+﻿@{
+    ViewData["Title"] = "Импорт из Excel";
+}
+
+<div class="container mt-5">
+    <h2>Импорт напитков из Excel</h2>
+
+    <form asp-controller="Admin" asp-action="Import" method="post" enctype="multipart/form-data">
+        <div class="mb-3">
+            <label for="file" class="form-label">Выберите Excel-файл (.xlsx):</label>
+            <input type="file" name="file" class="form-control" accept=".xlsx" required />
+        </div>
+        <button type="submit" class="btn btn-primary">Импортировать</button>
+    </form>
+
+    @if (ViewBag.Message != null)
+    {
+        <div class="alert alert-info mt-3">@ViewBag.Message</div>
+    }
+</div>
