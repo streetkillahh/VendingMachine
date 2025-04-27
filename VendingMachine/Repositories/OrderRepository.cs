@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Linq;
 using System.Threading.Tasks;
 using VendingMachine;
 using VendingMachine.Models.Domain;
@@ -18,7 +19,7 @@ namespace VendingMachine.Repositories
         {
             _context.Orders.Add(order);
             await _context.SaveChangesAsync();
-            return order.Id; // Вернём Id созданного заказа
+            return order.Id;
         }
 
         public async Task<Order> GetOrderByIdAsync(int orderId)
@@ -36,6 +37,23 @@ namespace VendingMachine.Repositories
                 order.IsPaid = true;
                 await _context.SaveChangesAsync();
             }
+        }
+
+
+        public async Task<Order> GetLastUnpaidOrderAsync()
+        {
+            return await _context.Orders
+                .Include(o => o.Items)
+                .ThenInclude(i => i.Catalog)
+                .Where(o => !o.IsPaid)
+                .OrderByDescending(o => o.CreatedAt)
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task UpdateOrderAsync(Order order)
+        {
+            _context.Orders.Update(order);
+            await _context.SaveChangesAsync();
         }
     }
 }

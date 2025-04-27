@@ -8,5 +8,7 @@ namespace VendingMachine.Repositories
         Task<int> AddOrderAsync(Order order);
         Task<Order> GetOrderByIdAsync(int orderId);
         Task MarkOrderAsPaidAsync(int orderId);
+        Task<Order> GetLastUnpaidOrderAsync();
+        Task UpdateOrderAsync(Order order);
     }
 }
