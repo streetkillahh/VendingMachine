@@ -5,6 +5,8 @@ namespace VendingMachine.Repositories
 {
     public interface IOrderRepository
     {
-        Task AddOrderAsync(Order order);
+        Task<int> AddOrderAsync(Order order);
+        Task<Order> GetOrderByIdAsync(int orderId);
+        Task MarkOrderAsPaidAsync(int orderId);
     }
 }

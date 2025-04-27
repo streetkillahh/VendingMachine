@@ -1,79 +1,98 @@
 ﻿@{
-    ViewData["Title"] = "Оплата заказа";
-    var total = ViewBag.Total as decimal? ?? 0;
+    ViewData["Title"] = "Оплата";
 }
 
 <div class="container my-5">
-    <h2 class="mb-4 text-center">Оплата заказа</h2>
+    <h2 class="mb-4">Оплата</h2>
 
-    <div class="text-center mb-4">
-        <h4>Сумма к оплате: <span id="totalAmount">@total.ToString("0.00")</span> руб.</h4>
-        <h5>Внесено: <span id="insertedAmount">0.00</span> руб.</h5>
-        <h5>Сдача: <span id="changeAmount">0.00</span> руб.</h5>
-    </div>
+    <table class="table align-middle">
+        <thead>
+            <tr>
+                <th>Номинал</th>
+                <th class="text-center" style="width: 150px;">Количество</th>
+                <th class="text-end" style="width: 100px;">Сумма</th>
+            </tr>
+        </thead>
+        <tbody id="paymentTable">
+            @foreach (var coin in new[] { 1, 2, 5, 10 })
+            {
+                <tr data-value="@coin">
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <div class="rounded-circle border d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; margin-right: 15px; font-weight: bold;">
+                                @coin
+                            </div>
+                            @coin рубль@(coin > 1 ? "ей" : "")
+                        </div>
+                    </td>
+                    <td class="text-center">
+                        <div class="d-flex justify-content-center align-items-center">
+                            <button class="btn btn-outline-secondary btn-sm decrease-btn">-</button>
+                            <input type="text" class="form-control text-center mx-2 quantity-input" value="1" style="width: 50px;" readonly>
+                            <button class="btn btn-outline-secondary btn-sm increase-btn">+</button>
+                        </div>
+                    </td>
+                    <td class="text-end fw-bold">
+                        <span class="row-sum">@coin</span> руб.
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
 
-    <div class="d-flex justify-content-center gap-3 flex-wrap mb-4">
-        <button class="btn btn-outline-primary" onclick="insertCoin(1)">1 руб.</button>
-        <button class="btn btn-outline-primary" onclick="insertCoin(2)">2 руб.</button>
-        <button class="btn btn-outline-primary" onclick="insertCoin(5)">5 руб.</button>
-        <button class="btn btn-outline-primary" onclick="insertCoin(10)">10 руб.</button>
-    </div>
+    <hr>
 
-    <div class="d-flex justify-content-center gap-3">
-        <a href="/Order/Checkout" class="btn btn-outline-secondary">Вернуться в корзину</a>
-        <button id="confirmBtn" class="btn btn-success" disabled onclick="confirmPayment()">Подтвердить оплату</button>
+    <div class="d-flex justify-content-between align-items-center mt-4">
+        <a href="/Order/Checkout" class="btn btn-warning">Вернуться</a>
+        <div class="d-flex align-items-center gap-4">
+            <div class="fw-bold fs-5">Итоговая сумма: <span id="orderTotal">0</span> руб.</div>
+            <div class="fw-bold fs-5">Вы внесли: <span id="insertedAmount" class="text-danger">0</span> руб.</div>
+            <form method="post" action="/Order/ConfirmPayment">
+                <input type="hidden" id="paidAmountInput" name="paidAmount" value="0" />
+                <button type="submit" class="btn btn-success btn-lg">Оплатить</button>
+            </form>
+        </div>
     </div>
 </div>
 
 @section Scripts {
     <script>
-        const total = parseFloat("@total");
-        let inserted = 0;
-        const selectedDrinks = JSON.parse(localStorage.getItem("selectedDrinks")) || [];
+        // Берём сумму заказа из localStorage
+        const orderTotal = localStorage.getItem('totalPrice') || 0;
+        document.getElementById('orderTotal').textContent = parseFloat(orderTotal).toFixed(0);
 
-        function updateUI() {
-            document.getElementById("insertedAmount").textContent = inserted.toFixed(2);
-            const change = inserted - total;
-            document.getElementById("changeAmount").textContent = change > 0 ? change.toFixed(2) : "0.00";
-            document.getElementById("confirmBtn").disabled = inserted < total;
-        }
-
-        function insertCoin(amount) {
-            inserted += amount;
-            updateUI();
-        }
-
-        function confirmPayment() {
-            fetch("/Order/SaveOrder", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    items: selectedDrinks.map(d => ({ id: d.id, price: parseFloat(d.price) })),
-                    totalPrice: total,
-                    totalInserted: inserted
-                })
-            })
-            .then(res => {
-                if (!res.ok) {
-                    return res.text().then(text => { throw new Error(text); });
-                }
-                return res.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    localStorage.removeItem("selectedDrinks");
-                    alert(`Заказ оплачен! Сдача: ${data.change.toFixed(2)} руб.`);
-                    window.location.href = "/Order/Success";
-                } else {
-                    alert("Ошибка при сохранении заказа: " + data);
-                }
-            })
-            .catch(err => {
-                alert("Ошибка соединения с сервером: " + err.message);
-                console.error(err);
+        function updateInsertedAmount() {
+            let totalInserted = 0;
+            document.querySelectorAll('#paymentTable tr').forEach(row => {
+                const quantity = parseInt(row.querySelector('.quantity-input').value);
+                const value = parseInt(row.getAttribute('data-value'));
+                const rowSum = quantity * value;
+                row.querySelector('.row-sum').textContent = rowSum;
+                totalInserted += rowSum;
             });
+            document.getElementById('insertedAmount').textContent = totalInserted.toFixed(0);
+            document.getElementById('paidAmountInput').value = totalInserted;
         }
 
-        updateUI();
+        document.querySelectorAll('.increase-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const input = this.parentElement.querySelector('.quantity-input');
+                input.value = parseInt(input.value) + 1;
+                updateInsertedAmount();
+            });
+        });
+
+        document.querySelectorAll('.decrease-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const input = this.parentElement.querySelector('.quantity-input');
+                if (parseInt(input.value) > 0) {
+                    input.value = parseInt(input.value) - 1;
+                    updateInsertedAmount();
+                }
+            });
+        });
+
+        // Начальная загрузка
+        updateInsertedAmount();
     </script>
 }

@@ -1,10 +1,14 @@
 ﻿@{
-    ViewData["Title"] = "Заказ оформлен";
+    ViewData["Title"] = "Успех";
 }
 
 <div class="container my-5 text-center">
-    <h2 class="mb-4 text-success">Спасибо за покупку!</h2>
-    <p class="lead">Ваш заказ успешно оплачен и оформлен. Ожидайте получения напитков из автомата 😊</p>
-
-    <a href="/" class="btn btn-primary mt-4">Вернуться в каталог</a>
+    <h2>Спасибо за покупку!</h2>
+    @if (ViewBag.ChangeAmount != null && (decimal)ViewBag.ChangeAmount > 0)
+    {
+        <div class="alert alert-info mt-4">
+            Ваша сдача: <strong>@((decimal)ViewBag.ChangeAmount) руб.</strong>
+        </div>
+    }
+    <a href="/" class="btn btn-primary mt-3">Вернуться в каталог</a>
 </div>

@@ -1,92 +1,56 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using VendingMachine.Models.Domain;
+using VendingMachine.Services;
+using VendingMachine.Repositories;
 
 namespace VendingMachine.Controllers
 {
     public class OrderController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IOrderService _orderService;
+        private readonly IOrderRepository _orderRepository;
 
-        public OrderController(ApplicationDbContext context)
+        public OrderController(IOrderService orderService, IOrderRepository orderRepository)
         {
-            _context = context;
-        }
-        // Отображение страницы корзины
-        public IActionResult Checkout()
-        {
-            return View();
-        }
-       
-        // Отображение страницы оплаты
-        [HttpGet]
-        public IActionResult Payment(decimal total)
-        {
-            ViewBag.Total = total;
-            return View();
+            _orderService = orderService;
+            _orderRepository = orderRepository;
         }
 
-        // Страница успеха после оплаты
+        [HttpPost]
+        public async Task<IActionResult> ConfirmPayment(decimal paidAmount)
+        {
+            // Получение текущего неоплаченного заказа
+            var order = await _orderRepository.GetLastUnpaidOrderAsync();
+            if (order == null)
+            {
+                return RedirectToAction("Checkout"); // если заказа нет
+            }
+
+            // Проверка хватает ли внесённой суммы
+            var totalPrice = order.Items.Sum(i => i.Quantity * i.Product.Price);
+
+            if (paidAmount < totalPrice)
+            {
+                TempData["PaymentError"] = "Недостаточно средств для оплаты заказа.";
+                return RedirectToAction("Payment");
+            }
+
+            // Подтверждение заказа как оплаченного
+            order.IsPaid = true;
+            await _orderRepository.UpdateOrderAsync(order);
+
+            // Подсчёт сдачи
+            var change = paidAmount - totalPrice;
+
+            // Передача суммы сдачи на представление Success
+            TempData["ChangeAmount"] = change;
+
+            return RedirectToAction("Success");
+        }
+
         public IActionResult Success()
         {
+            ViewBag.ChangeAmount = TempData["ChangeAmount"];
             return View();
         }
-        
-        [HttpPost]
-        public IActionResult SaveOrder([FromBody] OrderDto orderDto)
-        {
-            Console.WriteLine($"Получен заказ: {System.Text.Json.JsonSerializer.Serialize(orderDto)}");
-
-            if (orderDto.TotalInserted < orderDto.TotalPrice)
-            {
-                return BadRequest("Недостаточно средств.");
-            }
-
-            var order = new Order
-            {
-                CreatedAt = DateTime.Now,
-                TotalPrice = orderDto.TotalPrice,
-                Items = new List<OrderItem>()
-            };
-
-            foreach (var item in orderDto.Items)
-            {
-                var product = _context.Catalogs.FirstOrDefault(p => p.Id == item.Id);
-                if (product == null)
-                {
-                    return BadRequest(new { error = $"Товар с ID {item.Id} не найден." });
-
-                }
-
-                if (product.Quantity < 1)
-                {
-                    return BadRequest(new { error = $"Товар с ID {item.Id} не найден." });
-
-                }
-
-                if (product == null)
-                {
-                    return BadRequest(new { error = $"Товар с ID {item.Id} не найден." });
-
-                }
-
-                order.Items.Add(new OrderItem
-                {
-                    CatalogId = product.Id,
-                    Quantity = 1,
-                    UnitPrice = product.Price
-                });
-
-                product.Quantity -= 1;
-            }
-
-            _context.Orders.Add(order);
-            _context.SaveChanges();
-
-            decimal change = orderDto.TotalInserted - orderDto.TotalPrice;
-            return Ok(new { success = true, change });
-        }
-
-
     }
 }
