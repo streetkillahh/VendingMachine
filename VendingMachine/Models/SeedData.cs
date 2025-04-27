@@ -32,7 +32,7 @@ public static class SeedData
             var brandPepsi = context.Brands.FirstOrDefault(b => b.Name == "Pepsi");
             var brandMountainDew = context.Brands.FirstOrDefault(b => b.Name == "Mountain Dew");
             var brandIrnBru = context.Brands.FirstOrDefault(b => b.Name == "Irn Bru");
-            var brandChernogolovka = context.Brands.FirstOrDefault(b => b.Name == "Черноголовка");
+            var brandChernogolovka = context.Brands.FirstOrDefault(b => b.Name == "Chernogolovka");
 
 
             context.Catalogs.AddRange(

@@ -21,15 +21,8 @@ public class ApplicationDbContext : DbContext
             .Property(c => c.Price)
             .HasColumnType("decimal(18,2)");
 
-        // Настройка точности и масштаба для свойства TotalAmount в таблице Order
+        // Игнорируем вычисляемое свойство TotalPrice
         modelBuilder.Entity<Order>()
-            .Property(o => o.TotalPrice)
-            .HasColumnType("decimal(18,2)");
-
-
-        // Настройка точности для свойства UnitPrice в таблице OrderItem
-        modelBuilder.Entity<OrderItem>()
-            .Property(oi => oi.UnitPrice)
-            .HasColumnType("decimal(18,2");
+            .Ignore(o => o.TotalPrice);
     }
 }

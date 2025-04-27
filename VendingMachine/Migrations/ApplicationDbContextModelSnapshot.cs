@@ -96,8 +96,8 @@ namespace VendingMachine.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<decimal>("TotalPrice")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<bool>("IsPaid")
+                        .HasColumnType("bit");
 
                     b.HasKey("Id");
 
@@ -115,14 +115,11 @@ namespace VendingMachine.Migrations
                     b.Property<int>("CatalogId")
                         .HasColumnType("int");
 
-                    b.Property<int>("OrderId")
+                    b.Property<int?>("OrderId")
                         .HasColumnType("int");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
-
-                    b.Property<decimal>("UnitPrice")
-                        .HasColumnType("decimal(18,2");
 
                     b.HasKey("Id");
 
@@ -152,15 +149,11 @@ namespace VendingMachine.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("VendingMachine.Models.Domain.Order", "Order")
+                    b.HasOne("VendingMachine.Models.Domain.Order", null)
                         .WithMany("Items")
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("OrderId");
 
                     b.Navigation("Catalog");
-
-                    b.Navigation("Order");
                 });
 
             modelBuilder.Entity("VendingMachine.Models.Domain.Brand", b =>

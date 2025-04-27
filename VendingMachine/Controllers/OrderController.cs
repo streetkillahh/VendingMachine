@@ -26,7 +26,8 @@ namespace VendingMachine.Controllers
             }
 
             // Проверка хватает ли внесённой суммы
-            var totalPrice = order.Items.Sum(i => i.Quantity * i.UnitPrice);
+            var totalPrice = order.Items.Sum(i => i.Quantity * (i.Catalog?.Price ?? 0));
+
 
             if (paidAmount < totalPrice)
             {
