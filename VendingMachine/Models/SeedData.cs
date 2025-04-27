@@ -25,25 +25,83 @@ public static class SeedData
         // Добавление товаров
         if (!context.Catalogs.Any())
         {
-            var brandCocaCola = context.Brands.FirstOrDefault(b => b.Name == "Coca-Cola");
-            var brandSprite = context.Brands.FirstOrDefault(b => b.Name == "Sprite");
-            var brandFanta = context.Brands.FirstOrDefault(b => b.Name == "Fanta");
-            var brandDrPepper = context.Brands.FirstOrDefault(b => b.Name == "Dr. Pepper");
-            var brandPepsi = context.Brands.FirstOrDefault(b => b.Name == "Pepsi");
-            var brandMountainDew = context.Brands.FirstOrDefault(b => b.Name == "Mountain Dew");
-            var brandIrnBru = context.Brands.FirstOrDefault(b => b.Name == "Irn Bru");
-            var brandChernogolovka = context.Brands.FirstOrDefault(b => b.Name == "Chernogolovka");
+            var brands = context.Brands.ToList();
+
+            var brandCocaCola = brands.FirstOrDefault(b => b.Name == "Coca-Cola");
+            var brandSprite = brands.FirstOrDefault(b => b.Name == "Sprite");
+            var brandFanta = brands.FirstOrDefault(b => b.Name == "Fanta");
+            var brandDrPepper = brands.FirstOrDefault(b => b.Name == "Dr. Pepper");
+            var brandPepsi = brands.FirstOrDefault(b => b.Name == "Pepsi");
+            var brandMountainDew = brands.FirstOrDefault(b => b.Name == "Mountain Dew");
+            var brandIrnBru = brands.FirstOrDefault(b => b.Name == "Irn Bru");
+            var brandChernogolovka = brands.FirstOrDefault(b => b.Name == "Chernogolovka");
 
 
             context.Catalogs.AddRange(
-                new Catalog { Name = "Coca-Cola Classic", Price = 50, Quantity = 10, BrandId = brandCocaCola.Id },
-                new Catalog { Name = "Sprite Lemon", Price = 45, Quantity = 8, BrandId = brandSprite.Id },
-                new Catalog { Name = "Fanta Orange", Price = 25, Quantity = 10, BrandId = brandFanta.Id },
-                new Catalog { Name = "Dr. Pepper", Price = 45, Quantity = 10, BrandId = brandDrPepper.Id },
-                new Catalog { Name = "Pepsi Max", Price = 50, Quantity = 5, BrandId = brandPepsi.Id },
-                new Catalog { Name = "Mountain Dew", Price = 48, Quantity = 7, BrandId = brandMountainDew.Id },
-                new Catalog { Name = "Irn Bru", Price = 40, Quantity = 12, BrandId = brandIrnBru.Id },
-                new Catalog { Name = "Chenogolovka", Price = 35, Quantity = 6, BrandId = brandChernogolovka.Id }
+                new Catalog 
+                { 
+                    Name = "Coca-Cola Classic",
+                    Price = 50, 
+                    Quantity = 10, 
+                    Brand = brandCocaCola,
+                    BrandId = brandCocaCola?.Id ?? 0 // подстраховка
+                },
+                new Catalog 
+                { 
+                    Name = "Sprite Lemon", 
+                    Price = 45, 
+                    Quantity = 8, 
+                    Brand = brandSprite,
+                    BrandId = brandSprite?.Id ?? 0 
+                },
+                new Catalog 
+                { 
+                    Name = "Fanta Orange", 
+                    Price = 25, 
+                    Quantity = 10, 
+                    Brand = brandFanta,
+                    BrandId = brandFanta?.Id ?? 0
+                },
+                new Catalog 
+                { 
+                    Name = "Dr. Pepper", 
+                    Price = 45, 
+                    Quantity = 10, 
+                    Brand = brandDrPepper,
+                    BrandId = brandDrPepper?.Id ?? 0 
+                },
+                new Catalog 
+                { 
+                    Name = "Pepsi Max", 
+                    Price = 50, 
+                    Quantity = 5, 
+                    Brand = brandPepsi,
+                    BrandId = brandPepsi?.Id ?? 0 
+                },
+                new Catalog 
+                { 
+                    Name = "Mountain Dew", 
+                    Price = 48, 
+                    Quantity = 7, 
+                    Brand = brandMountainDew,
+                    BrandId = brandMountainDew?.Id ?? 0 
+                },
+                new Catalog 
+                { 
+                    Name = "Irn Bru", 
+                    Price = 40, 
+                    Quantity = 12, 
+                    Brand = brandIrnBru,
+                    BrandId = brandIrnBru?.Id ?? 0 
+                },
+                new Catalog 
+                { 
+                    Name = "Chenogolovka", 
+                    Price = 35, 
+                    Quantity = 6, 
+                    Brand = brandChernogolovka,
+                    BrandId = brandChernogolovka?.Id ?? 0 
+                }
             );
             context.SaveChanges();
         }
