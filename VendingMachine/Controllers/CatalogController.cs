@@ -1,32 +1,22 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using VendingMachine.Models;
-using VendingMachine.Models.Domain;
-
+using VendingMachine.Services;
+using System.Threading.Tasks;
 
 namespace VendingMachine.Controllers
 {
     public class CatalogController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ICatalogService _catalogService;
 
-        public CatalogController(ApplicationDbContext context)
+        public CatalogController(ICatalogService catalogService)
         {
-            _context = context;
+            _catalogService = catalogService;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            // Получаем список брендов для фильтра
-            var brands = _context.Brands.ToList();
-
-            // Передаем бренды через ViewBag
-            ViewBag.Brands = brands;
-
-            // Получаем список товаров для каталога
-            var catalog = _context.Catalogs.ToList();
-
-            // Передаем товары как модель представления
-            return View(catalog);
+            var catalogItems = await _catalogService.GetAllCatalogItemsAsync();
+            return View(catalogItems);
         }
     }
 }
