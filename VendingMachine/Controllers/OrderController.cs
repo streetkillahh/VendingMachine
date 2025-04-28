@@ -56,8 +56,7 @@ namespace VendingMachine.Controllers
             {
                 Name = i.Catalog?.Name,
                 Price = i.Catalog?.Price ?? 0,
-                Quantity = i.Quantity,
-                ImageUrl = GetImageForDrink(i.Catalog?.Name)
+                Quantity = i.Quantity
             }).ToList();
 
             return View(viewModel);
