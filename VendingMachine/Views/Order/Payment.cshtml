@@ -22,13 +22,13 @@
                             <div class="rounded-circle border d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; margin-right: 15px; font-weight: bold;">
                                 @coin
                             </div>
-                            @coin рубль@(coin > 1 ? "ей" : "")
+                            @coin @GetCurrencyForm(coin)
                         </div>
                     </td>
                     <td class="text-center">
                         <div class="d-flex justify-content-center align-items-center">
                             <button class="btn btn-outline-secondary btn-sm decrease-btn">-</button>
-                            <input type="text" class="form-control text-center mx-2 quantity-input" value="1" style="width: 50px;" readonly>
+                            <input type="text" class="form-control text-center mx-2 quantity-input" value="1" style="width: 50px;">
                             <button class="btn btn-outline-secondary btn-sm increase-btn">+</button>
                         </div>
                     </td>
@@ -95,4 +95,30 @@
         // Начальная загрузка
         updateInsertedAmount();
     </script>
+}
+
+@functions {
+    public string GetCurrencyForm(int number)
+    {
+        if (number == 1)
+        {
+            return "рубль";
+        }
+        else if (number >= 2 && number <= 4)
+        {
+            return "рубля";
+        }
+        else if ((number % 10 == 1) && (number % 100 != 11))
+        {
+            return "рубль";
+        }
+        else if ((number % 10 >= 2 && number % 10 <= 4) && !(number % 100 >= 12 && number % 100 <= 14))
+        {
+            return "рубля";
+        }
+        else
+        {
+            return "рублей";
+        }
+    }
 }
