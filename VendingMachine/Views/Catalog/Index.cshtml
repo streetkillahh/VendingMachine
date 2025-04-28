@@ -118,24 +118,39 @@
 
                 document.getElementById('selectedCountBtn').addEventListener('click', async function (e) {
             e.preventDefault();
-            const selectedDrinks = Array.from(selectedItems);
+            const selectedDrinks = getSelectedDrinksData();
 
             if (selectedDrinks.length > 0) {
-                const response = await fetch('/Order/CreateOrder', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(selectedDrinks)
-                });
+                const selectedIds = selectedDrinks.map(d => d.id);
 
-                if (response.ok) {
-                    window.location.href = '/Order/Checkout';
-                } else {
-                    alert('Ошибка при создании заказа');
+                try {
+                    const response = await fetch('/Order/CreateOrder', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(selectedIds)
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.redirectUrl) {
+                            window.location.href = data.redirectUrl;
+                        } else {
+                            console.error('Не найден redirectUrl в ответе сервера');
+                        }
+                    } else {
+                        const errorText = await response.text();
+                        alert('Ошибка при создании заказа: ' + errorText);
+                    }
+                } catch (error) {
+                    console.error('Ошибка при отправке заказа:', error);
+                    alert('Ошибка при создании заказа.');
                 }
             }
         });
+
+
 
 
         function updatePriceRangeLimits() {

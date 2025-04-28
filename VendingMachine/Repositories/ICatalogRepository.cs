@@ -8,6 +8,7 @@ namespace VendingMachine.Repositories
     {
         Task<IEnumerable<Catalog>> GetAllAsync();
         Task<Catalog> GetByIdAsync(int id);
+        Task<IEnumerable<Catalog>> GetCatalogItemsByIdsAsync(List<int> ids);
         Task UpdateAsync(Catalog catalog);
     }
 }

@@ -1,6 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using VendingMachine;
 using VendingMachine.Models.Domain;
 
@@ -22,7 +23,15 @@ namespace VendingMachine.Repositories
 
         public async Task<Catalog> GetByIdAsync(int id)
         {
-            return await _context.Catalogs.FindAsync(id);
+            return await _context.Catalogs.Include(c => c.Brand).FirstOrDefaultAsync(c => c.Id == id);
+        }
+
+        public async Task<IEnumerable<Catalog>> GetCatalogItemsByIdsAsync(List<int> ids)
+        {
+            return await _context.Catalogs
+                .Include(c => c.Brand)
+                .Where(c => ids.Contains(c.Id))
+                .ToListAsync();
         }
 
         public async Task UpdateAsync(Catalog catalog)
