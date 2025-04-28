@@ -12,17 +12,17 @@
             <tr>
                 <th>Товар</th>
                 <th class="text-center" style="width: 150px;">Количество</th>
-                <th class="text-end" style="width: 100px;">Цена</th>
+                <th class="text-end" style="width: 150px;">Сумма</th>
                 <th style="width: 50px;"></th>
             </tr>
         </thead>
         <tbody id="orderItems">
             @foreach (var item in Model)
             {
-                <tr data-id="@item.Id">
+                <tr data-id="@item.Id" data-price="@item.Price">
                     <td>
                         <div class="d-flex align-items-center">
-                            <img src="@item.ImageUrl" alt="@item.Name" style="width: 50px; height: 50px; object-fit: contain; margin-right: 15px;">
+                            <img src="@Url.Content(item.ImageUrl)" alt="@item.Name" style="width: 50px; height: 50px; object-fit: contain; margin-right: 15px;">
                             <div>@item.Name</div>
                         </div>
                     </td>
@@ -33,8 +33,8 @@
                             <button class="btn btn-outline-secondary btn-sm increase-btn">+</button>
                         </div>
                     </td>
-                    <td class="text-end fw-bold">
-                        <span class="item-price">@item.Price</span> руб.
+                    <td class="text-end fw-bold" style="white-space: nowrap;">
+                        <span class="item-total">@((item.Price * item.Quantity).ToString("0.00"))</span> руб.
                     </td>
                     <td class="text-center">
                         <button class="btn btn-link text-danger delete-btn">
@@ -51,7 +51,7 @@
     <div class="d-flex justify-content-between align-items-center mt-4">
         <a href="/Catalog/Index" class="btn btn-warning">Вернуться</a>
         <div class="d-flex align-items-center gap-3">
-            <div class="fw-bold fs-4">Итоговая сумма: <span id="totalPrice">0</span> руб.</div>
+            <div class="fw-bold fs-4">Итоговая сумма: <span id="totalPrice">0.00</span> руб.</div>
             <a href="/Order/Payment" class="btn btn-success btn-lg">Оплата</a>
         </div>
     </div>
@@ -59,30 +59,41 @@
 
 @section Scripts {
     <script>
+        function updateRowTotal(row) {
+            const quantity = parseInt(row.querySelector('.quantity-input').value);
+            const unitPrice = parseFloat(row.getAttribute('data-price'));
+            const total = quantity * unitPrice;
+            row.querySelector('.item-total').textContent = total.toFixed(2);
+        }
+
         function updateTotalPrice() {
             let total = 0;
             document.querySelectorAll('#orderItems tr').forEach(row => {
                 const quantity = parseInt(row.querySelector('.quantity-input').value);
-                const price = parseFloat(row.querySelector('.item-price').textContent);
-                total += quantity * price;
+                const unitPrice = parseFloat(row.getAttribute('data-price'));
+                total += quantity * unitPrice;
             });
-            document.getElementById('totalPrice').textContent = total.toFixed(0);
+            document.getElementById('totalPrice').textContent = total.toFixed(2);
             localStorage.setItem('totalPrice', total);
         }
 
         document.querySelectorAll('.increase-btn').forEach(btn => {
             btn.addEventListener('click', function () {
-                const input = this.parentElement.querySelector('.quantity-input');
+                const row = this.closest('tr');
+                const input = row.querySelector('.quantity-input');
                 input.value = parseInt(input.value) + 1;
+                updateRowTotal(row);
                 updateTotalPrice();
             });
         });
 
         document.querySelectorAll('.decrease-btn').forEach(btn => {
             btn.addEventListener('click', function () {
-                const input = this.parentElement.querySelector('.quantity-input');
+                const row = this.closest('tr');
+                const input = row.querySelector('.quantity-input');
                 if (parseInt(input.value) > 1) {
                     input.value = parseInt(input.value) - 1;
+                    updateRowTotal(row);
                     updateTotalPrice();
                 }
             });
@@ -96,7 +107,10 @@
             });
         });
 
-        // Начальная загрузка
-        updateTotalPrice();
+        // начальная инициализация
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('#orderItems tr').forEach(row => updateRowTotal(row));
+            updateTotalPrice();
+        });
     </script>
 }
