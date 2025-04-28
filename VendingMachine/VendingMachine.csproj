@@ -7,6 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Views\Payment\**" />
+    <Content Remove="Views\Payment\**" />
+    <EmbeddedResource Remove="Views\Payment\**" />
+    <None Remove="Views\Payment\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Remove="wwwroot\images\chernogolovka.png" />
     <Content Remove="wwwroot\images\cola.png" />
     <Content Remove="wwwroot\images\drpepper.png" />
@@ -28,10 +35,6 @@
     <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
     <PackageReference Include="Serilog.Extensions.Logging.File" Version="3.0.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Views\Payment\" />
   </ItemGroup>
 
   <ItemGroup>

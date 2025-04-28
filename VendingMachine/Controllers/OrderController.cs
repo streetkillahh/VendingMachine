@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using VendingMachine.Services;
 using VendingMachine.Repositories;
+using VendingMachine.Models.Domain;
 
 namespace VendingMachine.Controllers
 {
@@ -8,26 +9,41 @@ namespace VendingMachine.Controllers
     {
         private readonly IOrderService _orderService;
         private readonly IOrderRepository _orderRepository;
+        private readonly ICatalogRepository _catalogRepository;
 
-        public OrderController(IOrderService orderService, IOrderRepository orderRepository)
+        public OrderController(IOrderService orderService, IOrderRepository orderRepository, ICatalogRepository catalogRepository)
         {
             _orderService = orderService;
             _orderRepository = orderRepository;
+            _catalogRepository = catalogRepository;
         }
 
+        /* -----> Trouble with selectedCatalogIds <-----
+        [HttpPost]
+        public async Task<IActionResult> CreateOrder([FromBody] List<int> selectedCatalogIds)
+        {
+            if (selectedCatalogIds == null || !selectedCatalogIds.Any())
+            {
+                return BadRequest("Ничего не выбрано.");
+            }
+
+            await _orderService.CreateOrderAsync(selectedCatalogIds);
+            return Ok();
+        }
+        */
+
+
+        /* -----> Update this <-----
         [HttpPost]
         public async Task<IActionResult> ConfirmPayment(decimal paidAmount)
         {
-            // Получение текущего неоплаченного заказа
             var order = await _orderRepository.GetLastUnpaidOrderAsync();
             if (order == null)
             {
-                return RedirectToAction("Checkout"); // если заказа нет
+                return RedirectToAction("Checkout");
             }
 
-            // Проверка хватает ли внесённой суммы
             var totalPrice = order.Items.Sum(i => i.Quantity * (i.Catalog?.Price ?? 0));
-
 
             if (paidAmount < totalPrice)
             {
@@ -35,19 +51,28 @@ namespace VendingMachine.Controllers
                 return RedirectToAction("Payment");
             }
 
-            // Подтверждение заказа как оплаченного
             order.IsPaid = true;
             await _orderRepository.UpdateOrderAsync(order);
 
-            // Подсчёт сдачи
             var change = paidAmount - totalPrice;
-
-            // Передача суммы сдачи на представление Success
             TempData["ChangeAmount"] = change;
 
             return RedirectToAction("Success");
         }
+        */
+        [HttpGet]
+        public async Task<IActionResult> Checkout()
+        {
+            var order = await _orderRepository.GetLastUnpaidOrderAsync();
+            if (order == null || !order.Items.Any())
+            {
+                return RedirectToAction("Index", "Catalog");
+            }
 
+            return View(order);
+        }
+
+        [HttpGet]
         public IActionResult Success()
         {
             ViewBag.ChangeAmount = TempData["ChangeAmount"];

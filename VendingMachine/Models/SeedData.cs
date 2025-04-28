@@ -1,121 +1,80 @@
-﻿using System.Linq;
-using VendingMachine.Models.Domain;
-using VendingMachine.Models;
+﻿using VendingMachine.Models.Domain;
 
-public static class SeedData
+namespace VendingMachine.Models
 {
-    public static void Initialize(ApplicationDbContext context)
+    public static class SeedData
     {
-        // Добавление брендов
-        if (!context.Brands.Any())
+        public static void Initialize(ApplicationDbContext context)
         {
-            context.Brands.AddRange(
-                new Brand { Name = "Coca-Cola" },
-                new Brand { Name = "Sprite" },
-                new Brand { Name = "Fanta"},
-                new Brand { Name = "Dr. Pepper"},
-                new Brand { Name = "Pepsi"},
-                new Brand { Name = "Mountain Dew"},
-                new Brand { Name = "Irn Bru"},
-                new Brand { Name = "Черноголовка"}
-            );
-            context.SaveChanges();
-        }
+            if (!context.Brands.Any())
+            {
+                var brands = new List<Brand>
+                {
+                    new Brand { Name = "Coca-Cola" },
+                    new Brand { Name = "Sprite" },
+                    new Brand { Name = "Fanta" },
+                    new Brand { Name = "Dr. Pepper" },
+                    new Brand { Name = "Pepsi" },
+                    new Brand { Name = "Mountain Dew" },
+                    new Brand { Name = "Irn Bru" },
+                    new Brand { Name = "Chernogolovka" }
+                };
 
-        // Добавление товаров
-        if (!context.Catalogs.Any())
-        {
-            var brands = context.Brands.ToList();
+                context.Brands.AddRange(brands);
+                context.SaveChanges();
+            }
 
-            var brandCocaCola = brands.FirstOrDefault(b => b.Name == "Coca-Cola");
-            var brandSprite = brands.FirstOrDefault(b => b.Name == "Sprite");
-            var brandFanta = brands.FirstOrDefault(b => b.Name == "Fanta");
-            var brandDrPepper = brands.FirstOrDefault(b => b.Name == "Dr. Pepper");
-            var brandPepsi = brands.FirstOrDefault(b => b.Name == "Pepsi");
-            var brandMountainDew = brands.FirstOrDefault(b => b.Name == "Mountain Dew");
-            var brandIrnBru = brands.FirstOrDefault(b => b.Name == "Irn Bru");
-            var brandChernogolovka = brands.FirstOrDefault(b => b.Name == "Chernogolovka");
+            if (!context.Catalogs.Any())
+            {
+                var brands = context.Brands.ToList();
+                Catalog GetCatalog(string name, decimal price, int quantity, string brandName)
+                {
+                    var brand = brands.FirstOrDefault(b => b.Name == brandName)
+                               ?? throw new Exception($"Бренд {brandName} не найден");
 
-
-            context.Catalogs.AddRange(
-                new Catalog 
-                { 
-                    Name = "Coca-Cola Classic",
-                    Price = 50, 
-                    Quantity = 10, 
-                    Brand = brandCocaCola,
-                    BrandId = brandCocaCola?.Id ?? 0 // подстраховка
-                },
-                new Catalog 
-                { 
-                    Name = "Sprite Lemon", 
-                    Price = 45, 
-                    Quantity = 8, 
-                    Brand = brandSprite,
-                    BrandId = brandSprite?.Id ?? 0 
-                },
-                new Catalog 
-                { 
-                    Name = "Fanta Orange", 
-                    Price = 25, 
-                    Quantity = 10, 
-                    Brand = brandFanta,
-                    BrandId = brandFanta?.Id ?? 0
-                },
-                new Catalog 
-                { 
-                    Name = "Dr. Pepper", 
-                    Price = 45, 
-                    Quantity = 10, 
-                    Brand = brandDrPepper,
-                    BrandId = brandDrPepper?.Id ?? 0 
-                },
-                new Catalog 
-                { 
-                    Name = "Pepsi Max", 
-                    Price = 50, 
-                    Quantity = 5, 
-                    Brand = brandPepsi,
-                    BrandId = brandPepsi?.Id ?? 0 
-                },
-                new Catalog 
-                { 
-                    Name = "Mountain Dew", 
-                    Price = 48, 
-                    Quantity = 7, 
-                    Brand = brandMountainDew,
-                    BrandId = brandMountainDew?.Id ?? 0 
-                },
-                new Catalog 
-                { 
-                    Name = "Irn Bru", 
-                    Price = 40, 
-                    Quantity = 12, 
-                    Brand = brandIrnBru,
-                    BrandId = brandIrnBru?.Id ?? 0 
-                },
-                new Catalog 
-                { 
-                    Name = "Chenogolovka", 
-                    Price = 35, 
-                    Quantity = 6, 
-                    Brand = brandChernogolovka,
-                    BrandId = brandChernogolovka?.Id ?? 0 
+                    return new Catalog
+                    {
+                        Name = name,
+                        Price = price,
+                        Quantity = quantity,
+                        BrandId = brand.Id
+                    };
                 }
-            );
-            context.SaveChanges();
-        }
 
-        // Добавление монет
-        if (!context.Coins.Any())
-        {
-            context.Coins.AddRange(
-                new Coin { Denomination = 1, Quantity = 50 },
-                new Coin { Denomination = 2, Quantity = 50 },
-                new Coin { Denomination = 5, Quantity = 50 },
-                new Coin { Denomination = 10, Quantity = 50 }
-            );
-            context.SaveChanges();
+                var catalogItems = new List<Catalog>
+                {
+                    GetCatalog("Coca-Cola Classic", 80.50m, 10, "Coca-Cola"),
+                    GetCatalog("Coca-Cola Zero", 75.50m, 10, "Coca-Cola"),
+                    GetCatalog("Sprite Lemon", 60.20m, 8, "Sprite"),
+                    GetCatalog("Sprite Zero", 70.20m, 5, "Sprite"),
+                    GetCatalog("Fanta Orange", 55.00m, 6, "Fanta"),
+                    GetCatalog("Fanta Exotic", 95.10m, 4, "Fanta"),
+                    GetCatalog("Dr. Pepper Original", 100.30m, 7, "Dr. Pepper"),
+                    GetCatalog("Pepsi Max", 89.30m, 9, "Pepsi"),
+                    GetCatalog("Pepsi Light", 72.20m, 5, "Pepsi"),
+                    GetCatalog("Mountain Dew Citrus", 88.40m, 6, "Mountain Dew"),
+                    GetCatalog("Irn Bru Original", 69.50m, 5, "Irn Bru"),
+                    GetCatalog("Chernogolovka Baikal", 44.60m, 4, "Chernogolovka"),
+                    GetCatalog("Chernogolovka Tarhun", 47.60m, 4, "Chernogolovka")
+                };
+
+                context.Catalogs.AddRange(catalogItems);
+                context.SaveChanges();
+            }
+
+            if (!context.Coins.Any())
+            {
+                var coins = new List<Coin>
+                {
+                    new Coin { Denomination = 1, Quantity = 20 },
+                    new Coin { Denomination = 2, Quantity = 20 },
+                    new Coin { Denomination = 5, Quantity = 20},
+                    new Coin { Denomination = 10, Quantity = 20}
+                };
+
+                context.Coins.AddRange(coins);
+                context.SaveChanges();
+            }
         }
     }
 }

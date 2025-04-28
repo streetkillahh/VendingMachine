@@ -27,7 +27,7 @@ namespace VendingMachine.Services
             if (order == null)
                 return new PaymentResult { Success = false, ErrorMessage = "Заказ не найден." };
 
-            var totalPrice = order.Items.Sum(i => i.Quantity * i.Catalog.Price);
+            var totalPrice = order.Items.Sum(i => i.Quantity * (i.Catalog?.Price ?? 0));
 
             if (paidAmount < totalPrice)
                 return new PaymentResult { Success = false, ErrorMessage = "Недостаточно денег для оплаты заказа." };

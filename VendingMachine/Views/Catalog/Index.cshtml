@@ -103,7 +103,7 @@
                 function getSelectedDrinksData() {
             const selected = [];
             document.querySelectorAll('.select-btn[data-selected="true"]').forEach(btn => {
-                const id = parseInt(btn.getAttribute('data-id')); // ← теперь берём настоящий ID
+                const id = parseInt(btn.getAttribute('data-id'));
                 const card = btn.closest('.card');
                 const name = card.querySelector('.card-text').textContent;
                 const priceText = card.querySelector('.fw-bold').textContent;
@@ -116,15 +116,27 @@
         }
 
 
-        document.getElementById('selectedCountBtn').addEventListener('click', function (e) {
+                document.getElementById('selectedCountBtn').addEventListener('click', async function (e) {
             e.preventDefault();
-            const selectedDrinks = getSelectedDrinksData();
+            const selectedDrinks = Array.from(selectedItems);
 
             if (selectedDrinks.length > 0) {
-                localStorage.setItem('selectedDrinks', JSON.stringify(selectedDrinks));
-                window.location.href = '/Order/Checkout';
+                const response = await fetch('/Order/CreateOrder', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(selectedDrinks)
+                });
+
+                if (response.ok) {
+                    window.location.href = '/Order/Checkout';
+                } else {
+                    alert('Ошибка при создании заказа');
+                }
             }
         });
+
 
         function updatePriceRangeLimits() {
             const selectedBrand = brandSelect.value;
