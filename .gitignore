@@ -363,3 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 /VendingMachine/appsettings.json
 /VendingMachine/Migrations
+/VendingMachine/appsettings.Development.json
