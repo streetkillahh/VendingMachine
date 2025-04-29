@@ -62,7 +62,7 @@ namespace VendingMachine.Controllers
                     try
                     {
                         var name = row.Cell(1).GetValue<string>()?.Trim();
-                        var price = row.Cell(2).GetValue<decimal?>();
+                        var price = row.Cell(2).GetValue<int?>();
                         var quantity = row.Cell(3).GetValue<int?>();
                         var brandName = row.Cell(4).GetValue<string>()?.Trim();
 

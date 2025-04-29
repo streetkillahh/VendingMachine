@@ -27,7 +27,7 @@ namespace VendingMachine.Models
             if (!context.Catalogs.Any())
             {
                 var brands = context.Brands.ToList();
-                Catalog GetCatalog(string name, decimal price, int quantity, string brandName)
+                Catalog GetCatalog(string name, int price, int quantity, string brandName)
                 {
                     var brand = brands.FirstOrDefault(b => b.Name == brandName)
                                ?? throw new Exception($"Бренд {brandName} не найден");
@@ -43,19 +43,19 @@ namespace VendingMachine.Models
 
                 var catalogItems = new List<Catalog>
                 {
-                    GetCatalog("Coca-Cola Classic", 80.50m, 10, "Coca-Cola"),
-                    GetCatalog("Coca-Cola Zero", 75.50m, 10, "Coca-Cola"),
-                    GetCatalog("Sprite Lemon", 60.20m, 8, "Sprite"),
-                    GetCatalog("Sprite Zero", 70.20m, 5, "Sprite"),
-                    GetCatalog("Fanta Orange", 55.00m, 6, "Fanta"),
-                    GetCatalog("Fanta Exotic", 95.10m, 4, "Fanta"),
-                    GetCatalog("Dr. Pepper Original", 100.30m, 7, "Dr. Pepper"),
-                    GetCatalog("Pepsi Max", 89.30m, 9, "Pepsi"),
-                    GetCatalog("Pepsi Light", 72.20m, 5, "Pepsi"),
-                    GetCatalog("Mountain Dew Citrus", 88.40m, 6, "Mountain Dew"),
-                    GetCatalog("Irn Bru Original", 69.50m, 5, "Irn Bru"),
-                    GetCatalog("Chernogolovka Baikal", 44.60m, 4, "Chernogolovka"),
-                    GetCatalog("Chernogolovka Tarhun", 47.60m, 4, "Chernogolovka")
+                    GetCatalog("Coca-Cola Classic", 81, 10, "Coca-Cola"),
+                    GetCatalog("Coca-Cola Zero", 76, 10, "Coca-Cola"),
+                    GetCatalog("Sprite Lemon", 60, 8, "Sprite"),
+                    GetCatalog("Sprite Zero", 70, 5, "Sprite"),
+                    GetCatalog("Fanta Orange", 55, 6, "Fanta"),
+                    GetCatalog("Fanta Exotic", 95, 4, "Fanta"),
+                    GetCatalog("Dr. Pepper Original", 100, 7, "Dr. Pepper"),
+                    GetCatalog("Pepsi Max", 89, 9, "Pepsi"),
+                    GetCatalog("Pepsi Light", 72, 5, "Pepsi"),
+                    GetCatalog("Mountain Dew Citrus", 88, 6, "Mountain Dew"),
+                    GetCatalog("Irn Bru Original", 70, 5, "Irn Bru"),
+                    GetCatalog("Chernogolovka Baikal", 45, 4, "Chernogolovka"),
+                    GetCatalog("Chernogolovka Tarhun", 48, 4, "Chernogolovka")
                 };
 
                 context.Catalogs.AddRange(catalogItems);
@@ -68,8 +68,8 @@ namespace VendingMachine.Models
                 {
                     new Coin { Denomination = 1, Quantity = 20 },
                     new Coin { Denomination = 2, Quantity = 20 },
-                    new Coin { Denomination = 5, Quantity = 20},
-                    new Coin { Denomination = 10, Quantity = 20}
+                    new Coin { Denomination = 5, Quantity = 20 },
+                    new Coin { Denomination = 10, Quantity = 20 }
                 };
 
                 context.Coins.AddRange(coins);

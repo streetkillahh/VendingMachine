@@ -16,11 +16,6 @@ public class ApplicationDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // Настройка точности и масштаба для свойства Price в таблице Catalog
-        modelBuilder.Entity<Catalog>()
-            .Property(c => c.Price)
-            .HasColumnType("decimal(18,2)");
-
         // Игнорируем вычисляемое свойство TotalPrice
         modelBuilder.Entity<Order>()
             .Ignore(o => o.TotalPrice);
