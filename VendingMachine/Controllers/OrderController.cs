@@ -93,29 +93,41 @@ namespace VendingMachine.Controllers
 
         // Подтверждение оплаты
         [HttpPost]
-        public async Task<IActionResult> ConfirmPayment(decimal paidAmount)
+        public async Task<IActionResult> ConfirmPayment(int paidAmount)
         {
-            var order = await _orderRepository.GetLastUnpaidOrderAsync();
-            if (order == null)
+            try
             {
-                return RedirectToAction("Index");
+                var order = await _orderRepository.GetLastUnpaidOrderAsync();
+                if (order == null || order.Items == null || !order.Items.Any())
+                {
+                    return RedirectToAction("Index");
+                }
+
+                int totalPrice = (int)order.Items
+                    .Where(i => i.Catalog != null)
+                    .Sum(i => i.Quantity * (int)i.Catalog.Price);
+
+                if (paidAmount < totalPrice)
+                {
+                    TempData["PaymentError"] = "Недостаточно средств для оплаты заказа.";
+                    return RedirectToAction("Payment");
+                }
+
+                order.IsPaid = true;
+                await _orderRepository.UpdateOrderAsync(order);
+
+                int change = paidAmount - totalPrice;
+                if (change > 0)
+                {
+                    TempData["ChangeAmount"] = change;
+                }
+
+                return RedirectToAction("Success");
             }
-
-            var totalPrice = order.Items.Sum(i => i.Quantity * (i.Catalog?.Price ?? 0));
-
-            if (paidAmount < totalPrice)
+            catch (Exception ex)
             {
-                TempData["PaymentError"] = "Недостаточно средств для оплаты заказа.";
-                return RedirectToAction("Payment");
+                return Content("Ошибка: " + ex.Message + " | " + ex.StackTrace);
             }
-
-            order.IsPaid = true;
-            await _orderRepository.UpdateOrderAsync(order);
-
-            var change = paidAmount - totalPrice;
-            TempData["ChangeAmount"] = change;
-
-            return RedirectToAction("Success");
         }
 
         // Страница успешной оплаты

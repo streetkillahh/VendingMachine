@@ -44,9 +44,9 @@ namespace VendingMachine.Repositories
         {
             return await _context.Orders
                 .Include(o => o.Items)
-                .ThenInclude(i => i.Catalog)
+                    .ThenInclude(i => i.Catalog)
                 .Where(o => !o.IsPaid)
-                .OrderByDescending(o => o.CreatedAt)
+                .OrderByDescending(o => o.Id)
                 .FirstOrDefaultAsync();
         }
 
