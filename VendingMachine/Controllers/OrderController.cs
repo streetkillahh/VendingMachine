@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using VendingMachine.Models;
 using VendingMachine.Repositories;
 using VendingMachine.Services;
 using VendingMachine.Services.Models;
@@ -133,8 +134,34 @@ namespace VendingMachine.Controllers
         // Страница успешной оплаты
         public IActionResult Success()
         {
-            ViewBag.ChangeAmount = TempData["ChangeAmount"];
-            return View();
+            var changeAmount = TempData["ChangeAmount"] as int?;
+            var model = new PaymentResultViewModel();
+
+            if (changeAmount.HasValue && changeAmount.Value > 0)
+            {
+                model.Change = CalculateChange(changeAmount.Value);
+            }
+
+            return View(model);
         }
+
+        private Dictionary<int, int> CalculateChange(int amount)
+        {
+            var coins = new[] { 10, 5, 2, 1 };
+            var result = new Dictionary<int, int>();
+
+            foreach (var coin in coins)
+            {
+                int count = amount / coin;
+                if (count > 0)
+                {
+                    result[coin] = count;
+                    amount -= count * coin;
+                }
+            }
+
+            return result;
+        }
+
     }
 }

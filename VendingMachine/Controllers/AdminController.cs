@@ -1,6 +1,7 @@
 ﻿using ClosedXML.Excel;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 using System.IO;
 using VendingMachine.Models.Domain;
@@ -43,8 +44,6 @@ namespace VendingMachine.Controllers
             {
                 using var stream = new MemoryStream();
                 await file.CopyToAsync(stream);
-                Log.Information($"Stream length: {stream.Length}");
-
                 stream.Position = 0;
 
                 using var workbook = new XLWorkbook(stream);
@@ -56,6 +55,10 @@ namespace VendingMachine.Controllers
                     return View();
                 }
 
+                // Загружаем все существующие бренды один раз
+                var existingBrands = await _context.Brands.AsNoTracking()
+                    .ToDictionaryAsync(b => b.Name, b => b.Id);
+
                 var rows = worksheet.RangeUsed().RowsUsed().Skip(1); // Пропускаем заголовок
                 foreach (var row in rows)
                 {
@@ -66,27 +69,52 @@ namespace VendingMachine.Controllers
                         var quantity = row.Cell(3).GetValue<int?>();
                         var brandName = row.Cell(4).GetValue<string>()?.Trim();
 
-                        if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(brandName) || !price.HasValue || !quantity.HasValue)
-                            continue;
-
-                        var brand = _context.Brands.FirstOrDefault(b => b.Name == brandName);
-                        if (brand == null)
+                        if (string.IsNullOrWhiteSpace(name) ||
+                            string.IsNullOrWhiteSpace(brandName) ||
+                            !price.HasValue ||
+                            !quantity.HasValue)
                         {
-                            brand = new Brand { Name = brandName };
-                            _context.Brands.Add(brand);
-                            await _context.SaveChangesAsync();
+                            continue;
                         }
 
-                        var catalog = new Catalog
+                        // Проверяем, существует ли бренд
+                        if (!existingBrands.TryGetValue(brandName, out var brandId))
                         {
-                            Name = name,
-                            Price = price.Value,
-                            Quantity = quantity.Value,
-                            BrandId = brand.Id
-                        };
+                            // Создаём новый бренд
+                            var newBrand = new Brand { Name = brandName };
+                            _context.Brands.Add(newBrand);
+                            await _context.SaveChangesAsync(); // Сохраняем, чтобы получить Id
+                            brandId = newBrand.Id;
+                            existingBrands.Add(brandName, brandId); // Добавляем в кэш
+                        }
 
-                        _context.Catalogs.Add(catalog);
-                        importedCount++;
+                        // Проверяем, существует ли такой товар в каталоге
+                        var existingProduct = await _context.Catalogs
+                            .FirstOrDefaultAsync(c =>
+                                c.Name == name &&
+                                c.BrandId == brandId &&
+                                c.Price == price.Value);
+
+                        if (existingProduct != null)
+                        {
+                            // Обновляем количество
+                            existingProduct.Quantity += quantity.Value;
+                            _context.Catalogs.Update(existingProduct);
+                        }
+                        else
+                        {
+                            // Создаём новый товар
+                            var catalog = new Catalog
+                            {
+                                Name = name,
+                                Price = price.Value,
+                                Quantity = quantity.Value,
+                                BrandId = brandId
+                            };
+
+                            _context.Catalogs.Add(catalog);
+                            importedCount++;
+                        }
                     }
                     catch (Exception exRow)
                     {
@@ -96,7 +124,7 @@ namespace VendingMachine.Controllers
                 }
 
                 await _context.SaveChangesAsync();
-                ViewBag.Message = $"Импортировано {importedCount} напитков.";
+                ViewBag.Message = $"Импортировано {importedCount} новых напитков.";
             }
             catch (Exception ex)
             {
